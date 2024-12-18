@@ -1,7 +1,8 @@
-DB_CONFIG = {
-    'host': 'databaseprojectappscodegroup.cly6g06qycbq.us-east-1.rds.amazonaws.com',
-    'port': 3306,
-    'user': 'root',
-    'password': 'CodeGroup2024',
-    'database': 'test_db'
+import os
+
+DATABASE_CONFIG = {
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'test_db')
 }
