@@ -1,36 +1,36 @@
-# Usar uma imagem leve e confiável
-FROM python:3.10-slim
+# Use a imagem oficial leve do Python
+FROM python:3.9-slim
 
-# Criar e usar um usuário não root
-RUN addgroup --system appgroup && adduser --system --group appuser
+# Definir variáveis de ambiente
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Configuração básica
+# Criar um usuário não-root
+RUN adduser --disabled-password --gecos '' appuser
+
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Instalar dependências necessárias do sistema
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    --no-install-recommends && \
-    apt-get clean && \
+# Instalar dependências do sistema
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Instalar dependências Python com hash fixo
+# Instalar dependências Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar o código da aplicação
 COPY . .
 
-# Definir permissões para o usuário não root
-RUN chown -R appuser:appgroup /app
+# Alterar propriedade do diretório da aplicação
+RUN chown -R appuser:appuser /app
 
-# Alternar para o usuário não root
+# Alternar para o usuário não-root
 USER appuser
 
 # Expor a porta da aplicação
 EXPOSE 5000
 
-# Comando para executar o app
+# Executar a aplicação
 CMD ["python", "app.py"]
