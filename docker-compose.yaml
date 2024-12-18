@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=databaseprojectappscodegroup.cly6g06qycbq.us-east-1.rds.amazonaws.com
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=CodeGroup2024
+      - DB_NAME=test_db
