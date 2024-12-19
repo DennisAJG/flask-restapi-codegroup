@@ -53,6 +53,16 @@ pipeline {
                 sshagent(['ssh-key-jenkins']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com << EOF
+                    # Para aplicações em execução no /opt/apps
+                    if [ -d "/opt/apps" ]; then
+                        echo "Stopping application in /opt/apps..."
+                        cd /opt/apps
+                        docker-compose down || true
+                    else
+                        echo "/opt/apps not found, skipping stop."
+                    fi
+
+                    # Login no ECR e atualização da aplicação
                     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
                     docker pull $ECR_REPO_URL:$IMAGE_TAG
                     docker stop flask-app || true
@@ -62,12 +72,6 @@ pipeline {
                     '''
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
         }
     }
 }
