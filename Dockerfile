@@ -17,7 +17,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Instalar dependências Python
-COPY requirements.txt .
+COPY apps/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar o código da aplicação
