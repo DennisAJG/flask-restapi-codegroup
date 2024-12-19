@@ -1,5 +1,5 @@
 flask==2.0.3
 mysql-connector-python==8.0.28
 python-dotenv==1.0.0
-
+werkzeug==2.0.3
 
