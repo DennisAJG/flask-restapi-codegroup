@@ -47,17 +47,18 @@ pipeline {
             steps {
                 sshagent(['ssh-key-jenkins']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com << EOF
+                    # Criação do diretório na máquina remota
+                    ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com "sudo mkdir -p /opt/apps && sudo chown ubuntu:ubuntu /opt/apps"
             
-                    # Entrar no diretório de trabalho
-                    cd /opt/apps
+                    # Envio dos arquivos necessários
+                    scp -o StrictHostKeyChecking=no -r * ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com:/opt/apps/
             
-                    # Parar e remover qualquer container existente
-                    docker-compose down || true
-            
-                    # Iniciar o serviço com Docker Compose
-                    docker-compose up --build -d
-                    EOF
+                    # Execução dos comandos no servidor remoto
+                    ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com "
+                        cd /opt/apps &&
+                        docker-compose down || true &&
+                        docker-compose up --build -d
+                    "
                     '''
                 }
             }
