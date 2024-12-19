@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 RUN adduser --disabled-password --gecos '' appuser
 
 # Definir o diretório de trabalho
-WORKDIR /app
+WORKDIR /apps
 
 # Instalar dependências do sistema
 RUN apt-get update && \
