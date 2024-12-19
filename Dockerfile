@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED=1
 # Criar um usuário não-root
 RUN adduser --disabled-password --gecos '' appuser
 
-# Definir o diretório de trabalho
-WORKDIR /apps
+# Criar o diretório de trabalho
+WORKDIR /app
 
 # Instalar dependências do sistema
 RUN apt-get update && \
@@ -21,10 +21,10 @@ COPY apps/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar o código da aplicação
-COPY . .
+COPY apps/ /app
 
 # Alterar propriedade do diretório da aplicação
-RUN chown -R appuser:appuser /app
+RUN mkdir -p /app && chown -R appuser:appuser /app
 
 # Alternar para o usuário não-root
 USER appuser
