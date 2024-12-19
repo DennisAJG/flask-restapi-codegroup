@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('Login to ECR') {
+        stage('Push Image to ECR') {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
@@ -37,14 +37,9 @@ pipeline {
                 ]]) {
                     sh '''
                     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
+                    docker push $ECR_REPO_URL:$IMAGE_TAG
                     '''
                 }
-            }
-        }
-
-        stage('Push Image to ECR') {
-            steps {
-                sh 'docker push $ECR_REPO_URL:$IMAGE_TAG'
             }
         }
 
@@ -53,21 +48,22 @@ pipeline {
                 sshagent(['ssh-key-jenkins']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com << EOF
-                    # Parar aplicação existente no /opt/apps
-                    if [ -d "/opt/apps" ]; then
-                        echo "Stopping application in /opt/apps..."
-                        cd /opt/apps
-                        sudo docker-compose down || true
-                    fi
+                    set -e
+                    echo "Creating /opt/apps directory if it doesn't exist..."
+                    sudo mkdir -p /opt/apps
+                    sudo chown ubuntu:ubuntu /opt/apps
 
-                    # Login no ECR
-                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
+                    echo "Copying files to /opt/apps..."
+                    rm -rf /opt/apps/*
+                    exit
+EOF
+                    scp -o StrictHostKeyChecking=no -r * ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com:/opt/apps
 
-                    # Atualizar e executar a aplicação
-                    docker pull $ECR_REPO_URL:$IMAGE_TAG
-                    docker stop flask-app || true
-                    docker rm flask-app || true
-                    docker run -d --name flask-app -p 5000:5000 $ECR_REPO_URL:$IMAGE_TAG
+                    ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-196-122-229.compute-1.amazonaws.com << EOF
+                    echo "Starting application with docker-compose..."
+                    cd /opt/apps
+                    docker-compose down || true
+                    docker-compose up -d --build
                     EOF
                     '''
                 }
