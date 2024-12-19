@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        AWS_CREDENTIALS = credentials('aws-credentials')
-        ECR_REPO_URL = "891612581071.dkr.ecr.us-east-1.amazonaws.com/flask-restapi-apps-codegroup"
+        AWS_REGION = 'us-east-1'
+        ECR_REPO_URL = '891612581071.dkr.ecr.us-east-1.amazonaws.com/flask-restapi-apps-codegroup'
         IMAGE_NAME = 'flask-restapi-example'
         IMAGE_TAG = 'latest'
-        AWS_REGION = 'us-east-1'
+        AWS_CREDENTIALS = credentials('aws-credentials')
     }
 
     stages {
@@ -31,6 +31,8 @@ pipeline {
         stage('Login to ECR') {
             steps {
                 sh '''
+                export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDENTIALS | awk '{print $1}')
+                export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDENTIALS | awk '{print $2}')
                 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
                 '''
             }
