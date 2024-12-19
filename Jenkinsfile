@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        ECR_REPO_URL = "891612581071.dkr.ecr.us-east-1.amazonaws.com/flask-restapi-apps-codegroup" // Substituído automaticamente pelo Terraform
+        AWS_CREDENTIALS = credentials('aws-credentials')
+        ECR_REPO_URL = "891612581071.dkr.ecr.us-east-1.amazonaws.com/flask-restapi-apps-codegroup"
         IMAGE_NAME = 'flask-restapi-example'
         IMAGE_TAG = 'latest'
         AWS_REGION = 'us-east-1'
